@@ -18,7 +18,7 @@ from homeassistant.util import Throttle
 _LOGGER = logging.getLogger(__name__)
 
 LOCATIONS = 'locations'
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(minutes=30)
 AUTHORITIES = [
     'Barking and Dagenham',
     'Bexley',
