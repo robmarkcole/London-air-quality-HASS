@@ -1,0 +1,48 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/London
+
+frontend:
+config:
+http:
+updater:
+conversation:
+history:
+logbook:
+
+sensor:
+  - platform: london_air
+    locations:
+      - Merton
+      - Westminster
+
+  - platform: template
+    sensors:
+      updated:
+        friendly_name: 'Updated'
+        value_template: '{{states.sensor.merton.attributes.updated}}'
+      merton_pm10:
+        friendly_name: 'Merton PM10'
+        value_template: '{{states.sensor.merton.attributes.data[0].pollutants[0].summary}}'
+      westminster_s02:
+        friendly_name: 'Westminster S02'
+        value_template: '{{states.sensor.westminster.attributes.data[0].pollutants[3].summary}}'
+
+group:
+  default_view:
+    view: yes
+    entities:
+      - group.air_sensors
+
+  air_sensors:
+    name: Air sensors
+    entities:
+      - sensor.merton
+      - sensor.merton_pm10
+      - sensor.westminster
+      - sensor.westminster_s02
+      - sensor.updated
