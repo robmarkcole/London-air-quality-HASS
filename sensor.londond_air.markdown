@@ -1,5 +1,18 @@
-# London-air-quality-HASS
-Custom component to monitor London air quality
+---
+layout: page
+title: "London air quality"
+description: "Display the current status of London air quality by area and pollution type."
+date: 2017-08-02 18:00
+sidebar: true
+comments: false
+sharing: true
+footer: true
+logo: waqi.png
+ha_category: Health
+ha_iot_class: "Cloud Polling"
+ha_release: 0.51
+---
+
 
 The `london_air` component [queries](http://api.erg.kcl.ac.uk/AirQuality/Hourly/MonitoringIndex/GroupName=London/Json) the London air quality [data feed](https://www.londonair.org.uk/LondonAir/API/) provided by Kings College London. A single sensor will be added for each `location` ([local authority district or borough](https://en.wikipedia.org/wiki/List_of_London_boroughs)) specified in the configuration file. The state of each sensor is the overall air quality in that borough. Note that only 28 of the 32 boroughs have data available.
 
@@ -63,6 +76,3 @@ To explore the data available within the `data` attribute of a sensor use the `d
       friendly_name: 'Westminster S02'
       value_template: '{{states.sensor.westminster.attributes.data[0].pollutants[3].summary}}'
 ```
-
-
-<img src="https://github.com/robmarkcole/London-air-quality-HASS/blob/master/Usage.png" width="500" >
