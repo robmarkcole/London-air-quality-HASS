@@ -48,7 +48,8 @@ AUTHORITIES = [
     'Tower Hamlets',
     'Wandsworth',
     'Westminster']
-URL = 'http://api.erg.kcl.ac.uk/AirQuality/Hourly/MonitoringIndex/GroupName=London/Json'
+URL = ('http://api.erg.kcl.ac.uk/AirQuality/Hourly/'
+       'MonitoringIndex/GroupName=London/Json')
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(LOCATIONS):
@@ -141,11 +142,13 @@ class AirSensor(Entity):
         else:
             self._state = 'no_species_data'
 
+
 def parse_api_response(response):
-    """Take in the API response. API can return dict or list of data so need to check. """
-    data = dict.fromkeys(AUTHORITIES)     # Holds all data
+    """Take in the API response.
+       API can return dict or list of data so need to check. """
+    data = dict.fromkeys(AUTHORITIES)
     for authority in AUTHORITIES:
-        for entry in response['HourlyAirQualityIndex']['LocalAuthority']:   # Loop over entries
+        for entry in response['HourlyAirQualityIndex']['LocalAuthority']:
             if entry['@LocalAuthorityName'] == authority:
                 authority_data = []
 
@@ -158,11 +161,12 @@ def parse_api_response(response):
                     site_data = {}
                     species_data = []
 
-                    site_data['updated']   = site['@BulletinDate']
-                    site_data['latitude']  = site['@Latitude']
+                    site_data['updated'] = site['@BulletinDate']
+                    site_data['latitude'] = site['@Latitude']
                     site_data['longitude'] = site['@Longitude']
                     site_data['site_code'] = site['@SiteCode']
-                    site_data['site_name'] = site['@SiteName'].split("-")[-1].lstrip()
+                    site_data['site_name'] = site[
+                        '@SiteName'].split("-")[-1].lstrip()
                     site_data['site_type'] = site['@SiteType']
 
                     if isinstance(site['Species'], dict):
@@ -175,20 +179,26 @@ def parse_api_response(response):
                     for species in species_data:
                         if species['@AirQualityBand'] != 'No data':
                             species_dict = {}
-                            species_dict['description'] = species['@SpeciesDescription']
-                            species_dict['code'] = species['@SpeciesCode']
-                            species_dict['quality'] = species['@AirQualityBand']
-                            species_dict['index'] = species['@AirQualityIndex']
-                            species_dict['summary'] = species_dict['code'] + ' is ' + species_dict['quality']
+                            species_dict['description'] = species[
+                                '@SpeciesDescription']
+                            species_dict['code'] = species[
+                                '@SpeciesCode']
+                            species_dict['quality'] = species[
+                                '@AirQualityBand']
+                            species_dict['index'] = species[
+                                '@AirQualityIndex']
+                            species_dict['summary'] = species_dict[
+                                'code'] + ' is ' + species_dict['quality']
                             parsed_species_data.append(species_dict)
                             quality_list.append(species_dict['quality'])
-
-                    if not parsed_species_data:      # if no valid species data
+                    # If no valid species data.
+                    if not parsed_species_data:
                         parsed_species_data.append('no_species_data')
                     site_data['pollutants'] = parsed_species_data
 
                     if quality_list:
-                        site_data['pollutants_status'] = max(set(quality_list), key=quality_list.count)
+                        site_data['pollutants_status'] = max(
+                            set(quality_list), key=quality_list.count)
                         site_data['number_of_pollutants'] = len(quality_list)
                     else:
                         site_data['pollutants_status'] = 'no_species_data'
