@@ -12,6 +12,7 @@ import requests
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.const import STATE_UNKNOWN
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
@@ -79,7 +80,7 @@ class APIData(object):
     @Throttle(SCAN_INTERVAL)
     def update(self):
         """Get the latest data from TFL."""
-        response = requests.get(URL)
+        response = requests.get(URL, timeout=10)
         if response.status_code != 200:
             _LOGGER.warning("Invalid response from API")
         else:
@@ -87,14 +88,14 @@ class APIData(object):
 
 
 class AirSensor(Entity):
-    """Single authority air sensor"""
+    """Single authority air sensor."""
 
     ICON = 'mdi:cloud-outline'
 
     def __init__(self, name, APIdata):
         """Initialize the sensor."""
         self._name = name
-        self._APIdata = APIdata
+        self._api_data = APIdata
         self._site_data = None
         self._state = None
         self._updated = None
@@ -130,8 +131,8 @@ class AirSensor(Entity):
 
     def update(self):
         """Update the sensor."""
-        self._APIdata.update()
-        self._site_data = self._APIdata.data[self._name]
+        self._api_data.update()
+        self._site_data = self._api_data.data[self._name]
         self._updated = self._site_data[0]['updated']
         sites_status = []
         for site in self._site_data:
@@ -140,12 +141,11 @@ class AirSensor(Entity):
         if sites_status:
             self._state = max(set(sites_status), key=sites_status.count)
         else:
-            self._state = 'no_species_data'
+            self._state = STATE_UNKNOWN
 
 
 def parse_api_response(response):
-    """Take in the API response.
-       API can return dict or list of data so need to check. """
+    """Take in the API response."""
     data = dict.fromkeys(AUTHORITIES)
     for authority in AUTHORITIES:
         for entry in response['HourlyAirQualityIndex']['LocalAuthority']:
